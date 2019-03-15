@@ -113,8 +113,8 @@ delete(N,X,[Y|L], [Y|R]) :-
    %**********************************
 
 heuristique(U,H) :-
-   heuristique1(U, H).  % choisir l'heuristique
-%   heuristique2(U, H).  % utilisee ( 1 ou 2)
+%   heuristique1(U, H).  % choisir l'heuristique
+   heuristique2(U, H).  % utilisee ( 1 ou 2)
 
    %****************
    %HEURISTIQUE no 1
