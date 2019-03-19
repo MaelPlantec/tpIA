@@ -48,6 +48,7 @@ Predicat principal de l'algorithme :
 %*******************************************************************************
 
 main :-
+	writeln("main"),
 	% initialisations Pf, Pu et Q
 	initial_state(S0),
 	% lancement de Aetoile
@@ -59,23 +60,30 @@ main :-
 	empty(Q),
 	insert([[H0, H0, 0], S0], Pf, NewPf),
 	insert([S0, [H0, H0, 0], nil, nil], Pu, NewPu),
+	writeln("Debut de A*."),
 	aetoile(NewPf, NewPu, Q).
 
 
 %*******************************************************************************
 aetoile([], [], _) :- writeln("Pas de solution : l'etat final n'est pas atteignable !").
 
+%aetoile(Pf, _, Q) :-
 aetoile(Pf, _, Q) :-
 	% Si le noeud de valeur f min est la situation terminale, alors on a trouvé la solution et on l'affiche.
 	final_state(Sf),
-	suppress_min([_, Sf], Pf, _),
+	belongs([Sf, _, _, _], Q),
 	affiche_solution(Q, Sf, _).
 
 aetoile(Pf, Pu, Q) :-
 	% On enlève le noeud de Pf correspondant à l'état U à développer (celui de f min)
 	suppress_min([[F, H, G], U], Pf, NewPf),
+	final_state(Sf),
+
+	%not(belongs([Sf, _, _, _], Q)),
+
 	% On enlève aussi le noeud frère associé dans Pu
 	suppress([U, [F, H, G], Pere, A], Pu, NewPu),
+
 	% Développement de U
 	% % Déterminer tous les noeuds contenant un état successeur S de U
 	% % Et calculer Fs, Hs, Gs connaissant G(U) et le coût pour passer de U à S
@@ -83,6 +91,8 @@ aetoile(Pf, Pu, Q) :-
 	% % Traiter chaque noeud successeur
 	loop_successors(NoeudsPotentiels, NewPf, NewPu, Q, FinalPf, FinalPu),
 	% U désormais traité, on l'insère à Q
+
+
 	insert([U, [F, H, G], Pere, A], Q, FinalQ),
 	% Appel récursif
 	aetoile(FinalPf, FinalPu, FinalQ).
@@ -95,7 +105,8 @@ affiche_liste([E|Reste]) :-
 
 affiche_solution(_, S0, Liste) :-
 	initial_state(S0),
-	affiche_liste(Liste).
+	affiche_liste(Liste),
+	writeln("Affiche solution.").
 
 affiche_solution(Q, S, Liste) :-
 	belongs([S, Val, Pere, A], Q),
@@ -110,7 +121,8 @@ expand([[_, _, G], U], NoeudsPotentiels) :-
 	findall([S, [Fs, Hs, Gs], U, A], (rule(A, Cost, U, S), heuristique(S, Hs), Gs is G+Cost, Fs is Hs+Gs), NoeudsPotentiels).
 
 
-loop_successors([], _, _, _, _, _).
+loop_successors([], Pf, Pu, _, Pf, Pu).
+
 
 loop_successors([S|Suite], Pf, Pu, Q, NewPf, NewPu) :-
 	% Si S est connu dans Q, alors on oublie ce successeur
@@ -119,23 +131,24 @@ loop_successors([S|Suite], Pf, Pu, Q, NewPf, NewPu) :-
 
 	% Si S est connu dans Pu, alors on garle le terme associé à la meilleur évaluation (iden dans Pf)
 	% % Le nouveau noeud a une meilleur évaluation, on modifie P
-	loop_successors([[S, ValS, Pere, A]|Suite], Pf, Pu, Q, NewPf, NewPu) :-
-		belongs([S, Val, _, _], Pu),
-		ValS @< Val,
-		insert([S, ValS, Pere, A], NewPu, NextPu),
-		insert([ValS, S], NewPf, NextPf),
-		loop_successors(Suite, Pf, Pu, Q, NextPf, NextPu).
+loop_successors([[S, ValS, Pere, A]|Suite], Pf, Pu, Q, FinalPf, FinalPu) :-
+	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu),
+	suppress([S, Val, _, _], Pu, NewPu),
+	suppress([Val, S], Pf, NewPf),
+	ValS @< Val,
+	insert([S, ValS, Pere, A], NewPu, FinalPu),
+	insert([ValS, S], NewPf, FinalPf).
 
 	% % Le nouveau noeud est moins bien, on l'oublie.
-	loop_successors([[S, ValS, _, _]|Suite], Pf, Pu, Q, NewPf, NewPu) :-
-		belongs([S, Val, _, _], Pu),
-		ValS @> Val,
-		loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu).
+loop_successors([[S, ValS, _, _]|Suite], Pf, Pu, Q, NewPf, NewPu) :-
+	belongs([S, Val, _, _], Pu),
+	ValS @> Val,
+	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu).
 
-	% Sinon, on crée un nouveau terme à insérer dans Pu et Pf
-	loop_successors([[S, ValS, Pere, A]|Suite], Pf, Pu, Q, NewPf, NewPu) :-
-		insert([S, ValS, Pere, A], NewPu, NextPu),
-		insert([ValS, S], NewPf, NextPf),
-		loop_successors(Suite, Pf, Pu, Q, NextPf, NextPu).
+	% % Sinon, on crée un nouveau terme à insérer dans Pu et Pf
+loop_successors([[S, ValS, Pere, A]|Suite], Pf, Pu, Q, NextPf, NextPu) :-
+	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu),
+	insert([S, ValS, Pere, A], NewPu, NextPu),
+	insert([ValS, S], NewPf, NextPf).
 
 	%*******************************************************************************
