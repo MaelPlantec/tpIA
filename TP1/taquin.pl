@@ -50,7 +50,6 @@ write_state([Line|Rest]) :-
    writeln(Line),
    write_state(Rest).
 
-
 %**********************************************
 % REGLES DE DEPLACEMENT (up, down, left, right)
 %**********************************************
@@ -113,17 +112,16 @@ delete(N,X,[Y|L], [Y|R]) :-
    %**********************************
 
 heuristique(U,H) :-
-%   heuristique1(U, H).  % choisir l'heuristique
-   heuristique2(U, H).  % utilisee ( 1 ou 2)
+  heuristique1(U, H).  % choisir l'heuristique
+  %heuristique2(U, H).  % utilisee ( 1 ou 2)
 
    %****************
    %HEURISTIQUE no 1
    %****************
 
    % Différence entre 2 éléments
-   diffE(X, X, 0).
-   diffE(vide, _, 0).
-   diffE(X, Y, 1) :- X \= Y, X \= vide.
+   diffE(X, Y, H) :-
+     ((X \= vide, X \= Y) -> H = 1 ; H = 0).
 
    % Différence entre 2 lignes
    diffL([], [], 0).

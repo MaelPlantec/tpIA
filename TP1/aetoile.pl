@@ -71,7 +71,7 @@ aetoile(_, _, Q) :-
 	% Si le noeud de valeur f min est la situation terminale, alors on a trouvé la solution et on l'affiche.
 	final_state(Sf),
 	belongs([Sf, _, _, _], Q),
-	affiche_solution(Q, Sf, _).
+	affiche_solution(Q, Sf).
 
 aetoile(Pf, Pu, Q) :-
 	% On enlève le noeud de Pf correspondant à l'état U à développer (celui de f min)
@@ -97,20 +97,14 @@ aetoile(Pf, Pu, Q) :-
 	aetoile(FinalPf, FinalPu, FinalQ).
 
 %*******************************************************************************
-affiche_liste([]).
-affiche_liste([E|Reste]) :-
-	writeln(E),
-	affiche_liste(Reste).
 
-affiche_solution(_, S0, Liste) :-
-	initial_state(S0),
-	affiche_liste(Liste).
+affiche_solution(_, S0) :-
+	initial_state(S0).
 
-affiche_solution(Q, S, Liste) :-
+affiche_solution(Q, S) :-
 	belongs([S, Val, Pere, A], Q),
-	append([[Pere, Val, A, S]] , Liste, NewListe),
-	affiche_solution(Q, Pere, NewListe).
-
+	affiche_solution(Q, Pere),
+	writeln([Pere, A, S, Val]).
 
 expand([[_, _, G], U], NoeudsPotentiels) :-
 	% Déterminer tous les noeuds contenant un état successeur S de U
@@ -123,29 +117,29 @@ loop_successors([], Pf, Pu, _, Pf, Pu).
 
 loop_successors([S|Suite], Pf, Pu, Q, NewPf, NewPu) :-
 	% Si S est connu dans Q, alors on oublie ce successeur
-	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu),
-	belongs(S, Q).
+	loop_successor(S, Pf, Pu, Q, NPf, NPu),
+	loop_successors(Suite, NPf, NPu, Q, NewPf, NewPu).
+
+loop_successor(S, Pf, Pu, Q, Pf, Pu) :-
+		% Si S est connu dans Q, alors on oublie ce successeur
+		belongs(S, Q).
 
 	% Si S est connu dans Pu, alors on garle le terme associé à la meilleur évaluation (idem dans Pf)
 	% % Le nouveau noeud a une meilleur évaluation, on modifie P
-loop_successors([[S, ValS, Pere, A]|Suite], Pf, Pu, Q, FinalPf, FinalPu) :-
-	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu),
-	suppress([S, Val, _, _], Pu, NewPu),
-	suppress([Val, S], Pf, NewPf),
-	ValS @< Val,
-	insert([S, ValS, Pere, A], NewPu, FinalPu),
-	insert([ValS, S], NewPf, FinalPf).
-
-	% % Le nouveau noeud est moins bien, on l oublie.
-loop_successors([[S, ValS, _, _]|Suite], Pf, Pu, Q, NewPf, NewPu) :-
-	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu),
+loop_successor([S, ValS, Pere, A], Pf, Pu, _, FinalPf, FinalPu) :-
 	belongs([S, Val, _, _], Pu),
-	ValS @> Val.
+	((ValS @< Val) ->
+		suppress([S, Val, _, _], Pu, NewPu),
+		suppress([Val, S], Pf, NewPf),
+		insert([S, ValS, Pere, A], NewPu, FinalPu),
+		insert([ValS, S], NewPf, FinalPf)
+		;
+		FinalPf = Pf,
+		FinalPu = Pu).
 
 	% % Sinon, on crée un nouveau terme à insérer dans Pu et Pf
-loop_successors([[S, ValS, Pere, A]|Suite], Pf, Pu, Q, NextPf, NextPu) :-
-	loop_successors(Suite, Pf, Pu, Q, NewPf, NewPu),
-	insert([S, ValS, Pere, A], NewPu, NextPu),
-	insert([ValS, S], NewPf, NextPf).
+loop_successor([S, ValS, Pere, A], Pf, Pu, _, NextPf, NextPu) :-
+	insert([S, ValS, Pere, A], Pu, NextPu),
+	insert([ValS, S], Pf, NextPf).
 
 	%*******************************************************************************
