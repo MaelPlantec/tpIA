@@ -64,11 +64,9 @@ alignement(D, Matrix) :- diagonale(D,Matrix).
  	 existant dans une matrice carree NxN.
 	 ********************************************/
 
-ligne(L, M) :-  nth1(_, M, L).
+ligne(L, M) :- nth1(_, M, L).
 
-colonne([],[]).
-colonne(C,M) :-
-  findall(E, (nth1(N, M, L), nth1(N, L, E)), C).
+colonne(C,M) :- maplist(nth1(_), M, C).
 
 	/* D�finition de la relation liant une diagonale D � la matrice M dans laquelle elle se trouve.
 		il y en a 2 sortes de diagonales dans une matrice carree(https://fr.wikipedia.org/wiki/Diagonale) :
