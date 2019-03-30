@@ -115,52 +115,52 @@ heuristique(U,H) :-
   heuristique1(U, H).  % choisir l'heuristique
   %heuristique2(U, H).  % utilisee ( 1 ou 2)
 
-   %****************
-   %HEURISTIQUE no 1
-   %****************
+%****************
+%HEURISTIQUE no 1
+%****************
 
-   % Différence entre 2 éléments
-   diffE(X, Y, H) :-
-     ((X \= vide, X \= Y) -> H = 1 ; H = 0).
+% Différence entre 2 éléments
+diffE(X, Y, H) :-
+ ((X \= vide, X \= Y) -> H = 1 ; H = 0).
 
-   % Différence entre 2 lignes
-   diffL([], [], 0).
-   diffL([X|R1], [Y|R2], Nf) :-
-     diffE(X, Y, M),
-     diffL(R1, R2, N),
-     Nf is N+M.
+% Différence entre 2 lignes
+diffL([], [], 0).
+diffL([X|R1], [Y|R2], Nf) :-
+ diffE(X, Y, M),
+ diffL(R1, R2, N),
+ Nf is N+M.
 
-     % Différence entre 2 matrices
-     diffM([], [], 0).
-     diffM([X|R1], [Y|R2], Nf) :-
-       diffL(X, Y, M),
-       diffM(R1, R2, N),
-       Nf is N+M.
+% Différence entre 2 matrices
+diffM([], [], 0).
+diffM([X|R1], [Y|R2], Nf) :-
+ diffL(X, Y, M),
+ diffM(R1, R2, N),
+ Nf is N+M.
 
-   % Calcul du nombre de pieces mal placees dans l'etat courant U
-   % par rapport a l'etat final F
+% Calcul du nombre de pieces mal placees dans l'etat courant U
+% par rapport a l'etat final F
+heuristique1(U, H) :- final_state(Uf), diffM(U, Uf, H).
 
-    heuristique1(U, H) :- final_state(Uf), diffM(U, Uf, H).
 
+%****************
+%HEURISTIQUE no 2
+%****************
 
-   %****************
-   %HEURISTIQUE no 2
-   %****************
+% Coordonnés [X, Y] de l'élément E dans la matrice M
+coordonnees(E, M, [X, Y]):-
+  nth1(Y, M, Elt),
+  member(E, Elt),
+  nth1(X, Elt, E).
 
-      coordonnees(E, M, [X, Y]):-
-        nth1(Y, M, Elt),
-        member(E, Elt),
-        nth1(X, Elt, E).
+% Distance de Manhattan H de l'élément E entre sa position dans la matrice M et celle finale Mf
+distM(E, M, Mf, H) :-
+  coordonnees(E, M, [X1, Y1]),
+  coordonnees(E, Mf, [X2, Y2]),
+  H is (abs(X1-X2)+abs(Y1-Y2)).
 
-      distM(E, M, Mf, H) :-
-        coordonnees(E, M, [X1, Y1]),
-        coordonnees(E, Mf, [X2, Y2]),
-        H is (abs(X1-X2)+abs(Y1-Y2)).
-
-   % Somme sur l'ensemble des pieces des distances de Manhattan
-   % entre la position courante de la piece et sa positon dans l'etat final
-
-    heuristique2(U, Hf) :-
-      final_state(Uf),
-      findall(H, (member(Ligne, U), member(E, Ligne), E \= vide, distM(E, U, Uf, H)), ListeH),
-      sumlist(ListeH, Hf).
+% Somme sur l'ensemble des pieces des distances de Manhattan
+% entre la position courante de la piece et sa positon dans l'etat final
+heuristique2(U, Hf) :-
+  final_state(Uf),
+  findall(H, (member(Ligne, U), member(E, Ligne), E \= vide, distM(E, U, Uf, H)), ListeH),
+  sumlist(ListeH, Hf).
