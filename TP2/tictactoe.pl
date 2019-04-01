@@ -26,6 +26,7 @@
 	La situation initiale est une "matrice" 3x3 (liste de 3 listes de 3 termes chacune)
 	o� chacun des 9 termes est une variable libre.
 	*/
+m([[a,b,c], [d,e,f], [g,h,i]]).
 
 situation_initiale([ [_,_,_],
                      [_,_,_],
@@ -83,10 +84,8 @@ colonne(C,M) :- maplist(nth1(_), M, C).
 		R . . . . . . . I
 	*/
 
-diagonale(D, M) :-
-  premiere_diag(1,D,M),
-  taille_matrice(M, N),
-  seconde_diag(N,D,M).
+diagonale(D, M) :- premiere_diag(1,D,M).
+diagonale(D, M) :- seconde_diag(_,D,M).
 
 
 premiere_diag(_,[],[]).
@@ -96,7 +95,7 @@ premiere_diag(K,[E|D],[Ligne|M]) :-
 	premiere_diag(K1,D,M).
 
 % definition de la seconde diagonale A COMPLETER
-seconde_diag(_,[],[]).
+seconde_diag(0,[],[]).
 seconde_diag(K,[E|D],[Ligne|M]) :-
 	nth1(K,Ligne,E),
 	K1 is K-1,

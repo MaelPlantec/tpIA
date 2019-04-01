@@ -15,22 +15,26 @@
 initial_state([ [a, b, c],
                 [g, h, d],
                 [vide,f,e] ]). % h=2, f*=2
-*/
+
 initial_state([ [b, h, c],     % EXEMPLE
                 [a, f, d],     % DU COURS
                 [g,vide,e] ]). % h=5 = f* = 5actions
-/*
+
 initial_state([ [b, c, d],
                 [a,vide,g],
                 [f, h, e]  ]). % h=10 f*=10
-
+*/ 
 initial_state([ [f, g, a],
                 [h,vide,b],
                 [d, c, e]  ]). % h=16, f*=20
-
+/*
 initial_state([ [e, f, g],
                 [d,vide,h],
                 [c, b, a]  ]). % h=24, f*=30
+
+initial_state([ [a, b, c],
+                [g,vide,d],
+                [h, f, e]]). % etat non connexe avec l'etat final (PAS DE SOLUTION)
 */
 
    %******************
