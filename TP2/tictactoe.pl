@@ -50,7 +50,8 @@ adversaire(o,x).
 	 continuer � jouer (quel qu'il soit).
 	 ****************************************************/
 
-% situation_terminale(_Joueur, Situation) :-   ? ? ? ? ?
+situation_terminale(_Joueur, Situation) :- ground(Situation).
+% ground(@Term) : True if Term holds no free variables.
 
 /***************************
  DEFINITIONS D'UN ALIGNEMENT
@@ -115,8 +116,12 @@ possible([   ], _).
 	faut pas realiser l'unification.
 	*/
 
-% A FAIRE
-% unifiable(X,J) :- ? ? ? ? ?
+/*Pour moi : unifiable doit juste nous dire si une variable est _ ou pas. Retopurne oui si elle est _.*/
+unifiable(X,_) :- var(X). 
+% var(@Term) : True if Term currently is a free variable
+unifiable(X,J) :- 
+	ground(X), % pas de free-variable dans X ...
+	X == J. % X est inst par le joueur J.
 
 	/**********************************
 	 DEFINITION D'UN ALIGNEMENT GAGNANT
@@ -130,11 +135,17 @@ Un alignement perdant pour J est gagnant
 pour son adversaire.
 	*/
 
-% A FAIRE
+/*Ali est une liste ==> récursion sur elle.*/
+% alignement_gagnant(Ali, J) :- ???.
+alignement_gagnant([], _).
+alignement_gagnant([X|Reste], J) :- 
+	ground(X),
+	X=J, % NE PAS OUBLIER QUE LE SYMBOLE REPRESENTE LE JOUEUR
+	alignement_gagnant(Reste,J).
 
-% alignement_gagnant(Ali, J) :- ? ? ? ?
-
-% alignement_perdant(Ali, J) :- ? ? ? ?
+alignement_perdant(Ali, J) :-
+	adversaire(J,AutreJ),
+	alignement_gagnant(Ali,AutreJ). % Quand on perd l'autreJ gagne.
 
 
 	/******************************
@@ -145,9 +156,12 @@ pour son adversaire.
 	lorsqu'un joueur J joue en coordonnees [L,C]
      */
 
-% A FAIRE
-% successeur(J,Etat,[L,C]) :- ? ? ? ?
-
+successeur(J,Etat,[L,C]) :-
+	nth1(L,Etat,Lig),  % On récupère la bonne ligne.
+	nth1(C,Lig,Position), % On récupère la position dans la ligne.
+	var(Position), % Il n'y a rien déjà .. n'arrivera pas ?
+	Position=J.	% On instancie Pos avec le symbole de J.
+	 
 	/**************************************
    	 EVALUATION HEURISTIQUE D'UNE SITUATION
   	 **************************************/
@@ -177,4 +191,4 @@ heuristique(J,Situation,H) :-		% cas 2
 % c-a-d si Situation n'est ni perdante ni gagnante.
 
 % A FAIRE 					cas 3
-% heuristique(J,Situation,H) :- ? ? ? ?
+% heuristique(J,Situation,H) :- OUUUAAAAAAAAAAAAAAAAIS OUAIS ! ...
