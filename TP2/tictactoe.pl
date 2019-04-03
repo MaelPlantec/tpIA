@@ -117,9 +117,9 @@ possible([   ], _).
 	*/
 
 /*Pour moi : unifiable doit juste nous dire si une variable est _ ou pas. Retopurne oui si elle est _.*/
-unifiable(X,_) :- var(X). 
+unifiable(X,_) :- var(X).
 % var(@Term) : True if Term currently is a free variable
-unifiable(X,J) :- 
+unifiable(X,J) :-
 	ground(X), % pas de free-variable dans X ...
 	X == J. % X est inst par le joueur J.
 
@@ -138,7 +138,7 @@ pour son adversaire.
 /*Ali est une liste ==> récursion sur elle.*/
 % alignement_gagnant(Ali, J) :- ???.
 alignement_gagnant([], _).
-alignement_gagnant([X|Reste], J) :- 
+alignement_gagnant([X|Reste], J) :-
 	ground(X),
 	X=J, % NE PAS OUBLIER QUE LE SYMBOLE REPRESENTE LE JOUEUR
 	alignement_gagnant(Reste,J).
@@ -161,7 +161,7 @@ successeur(J,Etat,[L,C]) :-
 	nth1(C,Lig,Position), % On récupère la position dans la ligne.
 	var(Position), % Il n'y a rien déjà .. n'arrivera pas ?
 	Position=J.	% On instancie Pos avec le symbole de J.
-	 
+
 	/**************************************
    	 EVALUATION HEURISTIQUE D'UNE SITUATION
   	 **************************************/
@@ -190,5 +190,9 @@ heuristique(J,Situation,H) :-		% cas 2
 % on ne vient ici que si les cut precedents n'ont pas fonctionne,
 % c-a-d si Situation n'est ni perdante ni gagnante.
 
-% A FAIRE 					cas 3
-% heuristique(J,Situation,H) :- OUUUAAAAAAAAAAAAAAAAIS OUAIS ! ...
+heuristique(J,Situation,H) :-
+  findall(1, (alignement(AliG, Situation), possible(AliG, J)), AlisG),
+  sumlist(AlisG, SumG),
+  findall(1, (alignement(AliG, Situation), possible(AliP, J)), AlisP),
+  sumlist(AlisP, SumP),
+  H is SumG - SumP.
