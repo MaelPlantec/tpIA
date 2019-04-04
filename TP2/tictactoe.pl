@@ -116,7 +116,7 @@ possible([   ], _).
 	faut pas realiser l'unification.
 	*/
 
-/*Pour moi : unifiable doit juste nous dire si une variable est _ ou pas. Retopurne oui si elle est _.*/
+/*Pour moi : unifiable doit juste nous dire si une variable est _ ou pas. Retourne oui si elle est _.*/
 unifiable(X,_) :- var(X).
 % var(@Term) : True if Term currently is a free variable
 unifiable(X,J) :-
@@ -135,13 +135,9 @@ Un alignement perdant pour J est gagnant
 pour son adversaire.
 	*/
 
-/*Ali est une liste ==> récursion sur elle.*/
-% alignement_gagnant(Ali, J) :- ???.
-alignement_gagnant([], _).
-alignement_gagnant([X|Reste], J) :-
-	ground(X),
-	X=J, % NE PAS OUBLIER QUE LE SYMBOLE REPRESENTE LE JOUEUR
-	alignement_gagnant(Reste,J).
+alignement_gagnant(Ali, J) :- 
+	ground(Ali),
+	possible(Ali, J).
 
 alignement_perdant(Ali, J) :-
 	adversaire(J,AutreJ),
@@ -193,6 +189,7 @@ heuristique(J,Situation,H) :-		% cas 2
 heuristique(J,Situation,H) :-
   findall(1, (alignement(AliG, Situation), possible(AliG, J)), AlisG),
   sumlist(AlisG, SumG),
-  findall(1, (alignement(AliG, Situation), possible(AliP, J)), AlisP),
+  adversaire(J,AutreJ),
+  findall(1, (alignement(AliP, Situation), possible(AliP, AutreJ)), AlisP),
   sumlist(AlisP, SumP),
   H is SumG - SumP.
