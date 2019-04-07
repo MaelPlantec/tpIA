@@ -92,6 +92,9 @@ successeurs(J,Etat,Succ) :-
 	a partir de la liste des couples [Coup, Situation_Suivante]
 	*/
 
+/* On va iterer jusqu'à ne plus avoir d'éléments dans la liste [Coup, V].
+Tant qu'on atteint pas la profondeur Pmax, on va ré-appeler negamax avec comme joueur l'adversaire
+du joueur courant, une profondeur supplémentaire et l'état suivant.*/
 loop_negamax(_,_, _  ,[], []).
 loop_negamax(J,P,Pmax,[[Coup,Suiv]|Succ],[[Coup,Vsuiv]|Reste_Couples]) :-
 	loop_negamax(J,P,Pmax,Succ,Reste_Couples),
