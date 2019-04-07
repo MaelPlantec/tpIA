@@ -135,7 +135,7 @@ Un alignement perdant pour J est gagnant
 pour son adversaire.
 	*/
 
-alignement_gagnant(Ali, J) :- 
+alignement_gagnant(Ali, J) :-
 	ground(Ali),
 	possible(Ali, J).
 
@@ -171,7 +171,6 @@ successeur(J,Etat,[L,C]) :-
  	   le nombre d'alignements possibles pour l'adversaire de J
 */
 
-
 heuristique(J,Situation,H) :-		% cas 1
    H = 10000,				% grand nombre approximant +infini
    alignement(Alig,Situation),
@@ -181,7 +180,6 @@ heuristique(J,Situation,H) :-		% cas 2
    H = -10000,				% grand nombre approximant -infini
    alignement(Alig,Situation),
    alignement_perdant(Alig,J),!.
-
 
 % on ne vient ici que si les cut precedents n'ont pas fonctionne,
 % c-a-d si Situation n'est ni perdante ni gagnante.
