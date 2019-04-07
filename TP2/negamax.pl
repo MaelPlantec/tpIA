@@ -5,7 +5,6 @@
 
 :- [tictactoe].
 
-
 	/****************************************************
   	ALGORITHME MINMAX avec convention NEGAMAX : negamax/5
   	*****************************************************/
@@ -26,7 +25,8 @@
 developper cet Etat. Il n'y a donc pas de coup possible a jouer (Coup = rien)
 et l'evaluation de Etat est faite par l'heuristique. */
 negamax(J, Etat, Pmax, Pmax, [nil, Val]) :-
-	heuristique(J, Etat, Val).
+	heuristique(J, Etat, NewVal),
+	Val is -NewVal.
 
 /* 2/ la profondeur maximale n'est pas  atteinte mais J ne
 peut pas jouer ; au TicTacToe un joueur ne peut pas jouer
@@ -34,7 +34,8 @@ quand le tableau est complet (totalement instancie). Il n'y a pas de coup a joue
 et l'evaluation de Etat est faite par l'heuristique.  */
 negamax(J, Etat, _, _, [nil, Val]) :-
 	situation_terminale(J, Etat),
-	heuristique(J, Etat, Val).
+	heuristique(J, Etat, NewVal),
+	Val is -NewVal.
 
 /* 3/ la profondeur maxi n'est pas atteinte et J peut encore
 jouer. Il faut evaluer le sous-arbre complet issu de Etat ;
@@ -56,6 +57,7 @@ effectue cette selection.
 - finalement le couple retourné par negamax est [Coup, V2]
 avec : V2 is -V1 (cf. convention negamax vue en cours).  */
 negamax(J, Etat, P, Pmax, [Coup, Val]) :-
+	P < Pmax,
 	successeurs(J, Etat, Succ),
 	loop_negamax(J, P, Pmax, Succ, ListeCouples),
 	meilleur(ListeCouples, [Coup, MVal]),
@@ -125,7 +127,7 @@ meilleur([[C,V]|Reste], [MC, MV]) :-
 	(IV > V
 	-> MV = IV, MC = IC ; MV = V, MC = C).
 
-liste([[[1,2],1],[[1,3],21],[[1,4],3]]).
+liste([[[1,2],-3],[[1,3],-21],[[1,4],-1],[[1,4],-1]]).
 
 
 	/******************
@@ -137,10 +139,23 @@ main(Coup, Val, Pmax) :-
 	situation_initiale(S),
 	negamax(J, S, 0, Pmax, [Coup, Val]).
 
+% Doit placer x au centre
+test_coin(Coup, Val, Pmax) :-
+	Pmax >= 1,
+	negamax(x, [[o,_,_],[_,_,_],[_,_,_]], 1, Pmax, [Coup, Val]).
 
-	/*
-A FAIRE :
-	Compl�ter puis tester le programme principal pour plusieurs valeurs de la profondeur maximale.
-	Pmax = 1, 2, 3, 4 ...
-	Commentez les r�sultats obtenus.
-	*/
+test_centre(Coup, Val, Pmax) :-
+	Pmax >= 1,
+	negamax(x, [[_,_,_],[_,o,_],[_,_,_]], 1, Pmax, [Coup, Val]).
+
+test_1(Coup, Val, Pmax) :-
+	Pmax >= 2,
+	negamax(o, [[x,_,_],[_,o,_],[_,_,_]], 2, Pmax, [Coup, Val]).
+
+test_2(Coup, Val, Pmax) :-
+	Pmax >= 2,
+	negamax(o, [[_,x,_],[_,o,_],[_,_,_]], 2, Pmax, [Coup, Val]).
+
+test_diag(Coup, Val, Pmax) :-
+	Pmax >= 3,
+	negamax(x, [[x,_,o],[_,o,_],[_,_,_]], 3, Pmax, [Coup, Val]).
